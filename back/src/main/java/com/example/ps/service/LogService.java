@@ -34,7 +34,11 @@ public class LogService {
         log.setRobot(robot);
         log.setMessage(message);
         log.setType(type);
+<<<<<<< HEAD
         log.setTimestamp(timestamp != null ? timestamp : LocalDateTime.now());
+=======
+        log.setTimestamp( LocalDateTime.now());
+>>>>>>> 42135d9 (added MQTT)
 
         return logRepository.save(log);
     }

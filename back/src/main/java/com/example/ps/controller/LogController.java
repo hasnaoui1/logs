@@ -11,7 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 42135d9 (added MQTT)
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -53,14 +56,27 @@ public class LogController {
         }
 
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+<<<<<<< HEAD
         logEmitters.add(emitter);
 
         emitter.onCompletion(() -> logEmitters.remove(emitter));
         emitter.onTimeout(() -> logEmitters.remove(emitter));
+=======
+        com.example.ps.mqtt.MqttMessageHandler.addEmitter(emitter);
+
+        emitter.onCompletion(() -> com.example.ps.mqtt.MqttMessageHandler.removeEmitter(emitter));
+        emitter.onTimeout(() -> com.example.ps.mqtt.MqttMessageHandler.removeEmitter(emitter));
+        emitter.onError(e -> com.example.ps.mqtt.MqttMessageHandler.removeEmitter(emitter));
+>>>>>>> 42135d9 (added MQTT)
 
         return emitter;
     }
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 42135d9 (added MQTT)
     @PostMapping
     public ResponseEntity<Log> receiveLog(@RequestBody LogRequest request, @RequestParam String token) {
         if (!jwtService.isTokenValid(token)) {

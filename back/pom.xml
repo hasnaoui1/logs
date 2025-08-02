@@ -31,6 +31,21 @@
     </properties>
     <dependencies>
         <dependency>
+<<<<<<< HEAD
+=======
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-mqtt</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+            <version>1.2.5</version>
+        </dependency>
+
+
+        <dependency>
+>>>>>>> 42135d9 (added MQTT)
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
@@ -92,7 +107,11 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+<<<<<<< HEAD
         <!-- Maven -->
+=======
+
+>>>>>>> 42135d9 (added MQTT)
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
