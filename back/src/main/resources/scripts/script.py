@@ -1,114 +1,96 @@
-import requests
 import time
+import paho.mqtt.client as mqtt
 import random
-import datetime
-from collections import deque
+import json
+from datetime import datetime
 
-API_URL = "http://localhost:8080/api/logs"
-TOKEN = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYXNhbWluZTY2QGdtYWlsLmNvbSIsImlhdCI6MTc1Mzk0ODU3OCwiZXhwIjoxNzUzOTg0NTc4fQ.3gmuHpqyIsfLfxEyRSgRyMVhfmx7cqkt9XS1vRdWcA8"
-ROBOT_ID = 2
+broker = "localhost"
+topic = "logs/simulation"
+robot_id = 1
 
-GRID_SIZE = 5
-position = {"x": 0, "y": 0}
-LOG_HISTORY = deque(maxlen=9)
+client = mqtt.Client(client_id="robot-log-simulator")
+client.connect(broker, 1883, 60)
 
-LOG_LEVELS = ["INFO", "WARNING", "ERROR"]
-MESSAGES = {
-    "INFO": [
-        "Moved successfully",
-        "Heartbeat OK",
-        "Battery stable",
-        "Sensor read complete",
-        "Ping response normal",
-        "Awaiting next instruction"
-    ],
-    "WARNING": [
-        "Battery below 30%",
-        "Temperature approaching threshold",
-        "High CPU usage detected",
-        "Sensor delay",
-        "Obstacle nearby"
-    ],
-    "ERROR": [
-        "Motor failure",
-        "Lost GPS signal",
-        "Critical system error",
-        "Navigation stuck",
-        "Cannot reach destination"
-    ]
-}
+# ------- REALISTIC LOG TEMPLATES -------- #
 
-# === Determine next log level based on history ===
-def next_log_type():
-    counts = {"INFO": 0, "WARNING": 0, "ERROR": 0}
-    for l in LOG_HISTORY:
-        counts[l] += 1
-    if counts["INFO"] < 6:
-        return "INFO"
-    elif counts["WARNING"] < 2:
-        return "WARNING"
-    else:
-        return "ERROR"
+INFO_LOGS = [
+    lambda: f"[INFO] CPU Usage: {random.randint(8, 80)}%",
+    lambda: f"[INFO] Memory Usage: {random.randint(1000, 8000)}MB",
+    lambda: f"[INFO] Battery: {random.randint(20, 100)}%",
+    lambda: f"[INFO] Temperature: {random.randint(40, 85)}°C",
+    lambda: f"[INFO] Motor torque stabilized on joint {random.randint(1, 6)}",
+    lambda: f"[INFO] Sensor check OK (LIDAR: {random.randint(10, 30)}k points/s)",
+    lambda: f"[INFO] Odometry updated (x={random.uniform(0,10):.2f}, y={random.uniform(0,10):.2f})",
+    lambda: f"[INFO] FPS: {random.randint(15, 60)}",
+]
 
-# === Generate a movement-based log ===
+WARNING_LOGS = [
+    lambda: f"[WARNING] Battery low: {random.randint(5, 20)}%",
+    lambda: f"[WARNING] Motor overheating (joint {random.randint(1, 6)})",
+    lambda: f"[WARNING] High CPU load detected: {random.randint(80, 98)}%",
+    lambda: f"[WARNING] Network latency spike: {random.randint(100, 500)}ms",
+    lambda: f"[WARNING] Sensor noise increased on LIDAR",
+]
+
+ERROR_LOGS = [
+    lambda: "[ERROR] Joint controller failure on axis 2",
+    lambda: "[ERROR] Obstacle detected: emergency brake engaged",
+    lambda: "[ERROR] Lost communication with navigation module",
+    lambda: "[ERROR] Unable to localize robot (SLAM failure)",
+    lambda: "[ERROR] Motor stall detected on wheel 1",
+]
+
+EVENT_LOGS = [
+    lambda: "[EVENT] Robot started navigation task",
+    lambda: "[EVENT] Reached checkpoint A",
+    lambda: "[EVENT] Docking for charging",
+    lambda: "[EVENT] Human detected, switching to safe mode",
+    lambda: "[EVENT] Route recalculated due to obstruction",
+]
+
+# Weighted distribution (realistic)
+LOG_WEIGHTS = [
+    ("INFO", 0.70),
+    ("WARNING", 0.15),
+    ("ERROR", 0.10),
+    ("EVENT", 0.05),
+]
+
+def pick_log():
+    r = random.random()
+    cumulative = 0
+    for log_type, weight in LOG_WEIGHTS:
+        cumulative += weight
+        if r <= cumulative:
+            return log_type
+    return "INFO"
+
 def generate_log():
-    global position
+    log_type = pick_log()
 
-    direction = random.choice(["up", "down", "left", "right"])
-    old_pos = position.copy()
-
-    if direction == "up":
-        position["y"] = max(0, position["y"] - 1)
-    elif direction == "down":
-        position["y"] = min(GRID_SIZE - 1, position["y"] + 1)
-    elif direction == "left":
-        position["x"] = max(0, position["x"] - 1)
-    elif direction == "right":
-        position["x"] = min(GRID_SIZE - 1, position["x"] + 1)
-
-    stuck = old_pos == position
-    timestamp = datetime.datetime.utcnow().isoformat()
-
-    if stuck:
-        log_type = "ERROR"
-        message = f"Tried to move {direction} but hit wall"
+    if log_type == "INFO":
+        msg = random.choice(INFO_LOGS)()
+    elif log_type == "WARNING":
+        msg = random.choice(WARNING_LOGS)()
+    elif log_type == "ERROR":
+        msg = random.choice(ERROR_LOGS)()
     else:
-        log_type = next_log_type()
-        message = (
-            f"Moved {direction} to ({position['x']},{position['y']})"
-            if log_type == "INFO"
-            else random.choice(MESSAGES[log_type])
-        )
+        msg = random.choice(EVENT_LOGS)()
 
-    LOG_HISTORY.append(log_type)
+    timestamp = datetime.utcnow().isoformat()
 
-    return {
-        "robotId": ROBOT_ID,
-        "type": log_type,
-        "message": message,
-        "timestamp": timestamp
-    }
+    # Final format: robotId|timestamp|message
+    return f"{robot_id}|{timestamp}|{msg}"
 
-# === Send log to backend ===
-def send_log():
-    headers = {
-        "Authorization": f"Bearer {TOKEN}",
-        "Content-Type": "application/json"
-    }
+# ------------ PUBLISH LOOP ------------ #
 
+try:
     while True:
-        log_data = generate_log()
-        try:
-            response = requests.post(
-                f"{API_URL}?token={TOKEN}",
-                json=log_data,
-                headers=headers
-            )
-            print(f"[{log_data['timestamp']}] Sent {log_data['type']}: {log_data['message']} - Status: {response.status_code}")
-        except Exception as e:
-            print("Error sending log:", e)
+        log = generate_log()
+        client.publish(topic, log)
+        print("Published:", log)
+        time.sleep(random.uniform(0.5, 1.5))  # Realistic frequency
 
-        time.sleep(1.5)
-
-if __name__ == "__main__":
-    send_log()
+except KeyboardInterrupt:
+    print("Stopped.")
+    client.disconnect()

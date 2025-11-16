@@ -16,11 +16,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-<<<<<<< HEAD
-@RequestMapping
-=======
 @RequestMapping("/auth")
->>>>>>> 42135d9 (added MQTT)
+
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -30,31 +27,19 @@ public class AuthController {
     private final JwtAuthFilter jwtAuthFilter;
 
     @CrossOrigin(origins = "http://localhost:5173")
-<<<<<<< HEAD
-    @PostMapping("/auth/signup")
-=======
+
+
+
     @PostMapping("/signup")
->>>>>>> 42135d9 (added MQTT)
+
     public String signup(@RequestBody SignupRequest request) {
         userService.signup(request.getEmail(), request.getPassword());
         return "User registered successfully";
     }
 
-<<<<<<< HEAD
-    @PostMapping("/auth/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
-
-        UserDetails user = (UserDetails) authentication.getPrincipal();
-        String token = jwtUtil.generateToken(user);
-
-        return ResponseEntity.ok(new AuthResponse(token));
-    }
 
 
-=======
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
@@ -76,7 +61,7 @@ public class AuthController {
 
 
 
->>>>>>> 42135d9 (added MQTT)
+
     @GetMapping("/info")
     public ResponseEntity<String> info() {
 
