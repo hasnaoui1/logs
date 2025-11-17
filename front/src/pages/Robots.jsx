@@ -8,7 +8,7 @@ function Robots() {
   const navigate = useNavigate();
   const { robots, getAllRobots } = useRobots();
   const [modal, setModal] = useState(false);
-  const [robot, setRobot] = useState({ name: "", status: false, tasks: 0 });
+  const [robot, setRobot] = useState({ name: "", status: false, sessions: 0 });
   const [editId, setEditId] = useState(null);
   const [editData, setEditData] = useState({});
   const token = localStorage.getItem("token");
@@ -32,7 +32,7 @@ function Robots() {
       .then(() => {
         getAllRobots();
         setModal(false);
-        setRobot({ name: "", status: false, tasks: 0 });
+        setRobot({ name: "", status: false, sessions: 0 });
       })
       .catch((err) => console.log(err.message));
   };
@@ -45,7 +45,7 @@ function Robots() {
 
   const startEdit = (robot) => {
     setEditId(robot.id);
-    setEditData({ name: robot.name, status: robot.status, tasks: robot.tasks });
+    setEditData({ name: robot.name, status: robot.status, sessions: robot.sessions });
   };
 
   const cancelEdit = () => {
@@ -70,6 +70,7 @@ function Robots() {
       })
       .catch((err) => console.log(err));
   };
+  console.log(robot)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200">
@@ -102,9 +103,9 @@ function Robots() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-600">Tasks Completed</label>
+                <label className="block text-sm font-medium text-gray-600">Active Sessions</label>
                 <input
-                  type="number" name="tasks" value={robot.tasks} onChange={handleChange} min={0} required
+                  type="number" name="sessions" value={robot.sessions} onChange={handleChange} min={0} required
                   className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -138,7 +139,7 @@ function Robots() {
                 <th className="px-6 py-3 font-semibold tracking-wide">ID</th>
                 <th className="px-6 py-3 font-semibold tracking-wide">Name</th>
                 <th className="px-6 py-3 font-semibold tracking-wide">Status</th>
-                <th className="px-6 py-3 font-semibold tracking-wide">Tasks</th>
+                <th className="px-6 py-3 font-semibold tracking-wide">Sessions</th>
                 <th className="px-6 py-3 font-semibold tracking-wide">Actions</th>
               </tr>
             </thead>
@@ -182,13 +183,13 @@ function Robots() {
                     {editId === robot.id ? (
                       <input
                         type="number"
-                        name="tasks"
-                        value={editData.tasks}
+                        name="sessions"
+                        value={editData.sessions}
                         onChange={handleEditChange}
                         className="border rounded px-2 py-1 w-full"
                       />
                     ) : (
-                      robot.tasks
+                      robot.sessions
                     )}
                   </td>
 

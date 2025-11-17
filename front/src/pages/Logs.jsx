@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useRobots } from "../services/RobotsContext";
 import axiosInstance from "../services/axiosInstance";
-import Navbar from "../components/Navbar";
 
 const levelColors = {
   INFO: "bg-blue-100 text-blue-700 ring-1 ring-blue-300",

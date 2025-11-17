@@ -13,11 +13,13 @@ function RobotStats() {
     getLogs()
    
   },[])
+
+  console.log(robots)
  
   const stats = [
     { label: 'Total Robots', value: robots.length },
     { label: 'Active Robots', value: robots.filter(r=> r.status===true).length },
-    { label: 'Tasks Completed', value:  robots.reduce((sum, r) => sum + (r.tasks || 0), 0) },
+    { label: 'Tasks Completed', value:  robots.reduce((sum, r) => sum + (r.sessions || 0), 0) },
     { label: 'Errors Detected', value: logs.filter(l=>l.type=="ERROR").length },
   ];  
 

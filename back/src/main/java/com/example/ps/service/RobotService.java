@@ -43,4 +43,13 @@ public class RobotService {
         }
         return robotOptional.get();
     }
+    public void incrementSessions(Long id) {
+        Optional<Robot> robotOptional = robotRepository.findById(id);
+        if (robotOptional.isPresent()) {
+            Robot robot = robotOptional.get();
+            robot.setSessions(robot.getSessions() + 1);
+             robotRepository.save(robot);
+        }
+    }
+
 }

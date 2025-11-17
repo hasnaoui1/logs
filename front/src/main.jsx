@@ -6,11 +6,11 @@ import { RobotsProvider } from './services/RobotsContext.jsx'
 import { LogsProvider } from './services/LogsContext.jsx'
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  
     <RobotsProvider>
       <LogsProvider>
           <App />
       </LogsProvider>
     </RobotsProvider>
-  </StrictMode>,
+  
 )

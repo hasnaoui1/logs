@@ -44,8 +44,8 @@ class RobotController {
         return robotService.getRobotById(id)
                 .map(robot -> {
                     robot.setName(updatedRobot.getName());
-                    robot.setStatus(updatedRobot.getStatus()); // <-- Add this
-                    robot.setTasks(updatedRobot.getTasks());   // <-- And this
+                    robot.setStatus(updatedRobot.getStatus());
+                    robot.setSessions(updatedRobot.getSessions());
                     return robotService.saveRobot(robot);
                 })
                 .orElseGet(() -> {
@@ -63,8 +63,13 @@ class RobotController {
     @PutMapping("/changeStatus/{id}/status")
     public ResponseEntity<Robot> toggleStatus(@PathVariable Long id, @RequestParam boolean status) {
         Robot updatedRobot = robotService.changeStatus(id, status);
+
+
         if(!status){
             notificationService.createNotification("robot" + updatedRobot.getName()+ "has been turned off");
+        }
+        if(status){
+            robotService.incrementSessions(id);
         }
         return ResponseEntity.ok(updatedRobot);
     }
