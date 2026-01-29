@@ -65,13 +65,8 @@ public class LogController {
         emitter.onTimeout(() -> MqttMessageHandler.removeEmitter(emitter));
         emitter.onError(e -> MqttMessageHandler.removeEmitter(emitter));
 
-
         return emitter;
     }
-
-
-
-
 
     @PostMapping
     public ResponseEntity<Log> receiveLog(@RequestBody LogRequest request, @RequestParam String token) {
@@ -83,17 +78,24 @@ public class LogController {
                 request.robotId,
                 request.message,
                 request.type,
-                request.timestamp
-        );
+                request.timestamp);
         if ("ERROR".equalsIgnoreCase(request.type)) {
             notificationService.createNotification("Error from Robot ID " + request.robotId + ": " + request.message);
         }
+
+        com.example.ps.dto.LogResponse response = new com.example.ps.dto.LogResponse(
+                savedLog.getId(),
+                savedLog.getMessage(),
+                savedLog.getType(),
+                savedLog.getTimestamp(),
+                savedLog.getRobot() != null ? savedLog.getRobot().getId() : null,
+                savedLog.getSession() != null ? savedLog.getSession().getId() : null);
 
         for (SseEmitter emitter : logEmitters) {
             try {
                 emitter.send(SseEmitter.event()
                         .name("log")
-                        .data(savedLog));
+                        .data(response));
             } catch (Exception e) {
                 logEmitters.remove(emitter);
             }
@@ -101,9 +103,6 @@ public class LogController {
 
         return ResponseEntity.ok(savedLog);
     }
-
-
-
 
     private Process currentProcess;
 
@@ -129,12 +128,11 @@ public class LogController {
             }
         }
     }
+
     @DeleteMapping("/robot/{robotId}")
     public ResponseEntity<Void> deleteLogsByRobot(@PathVariable Long robotId) {
         logService.deleteLogsByRobotId(robotId);
         return ResponseEntity.noContent().build();
     }
 
-
 }
-

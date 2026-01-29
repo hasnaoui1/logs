@@ -1,5 +1,6 @@
 package com.example.ps.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,6 +23,13 @@ public class Log {
     private String type;
     private LocalDateTime timestamp;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "robot_id")
+    @JsonIgnoreProperties({ "sessions", "logs", "hibernateLazyInitializer", "handler" })
     private Robot robot;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "session_id")
+    @JsonIgnoreProperties({ "logs", "robot", "hibernateLazyInitializer", "handler" })
+    private Session session;
 }

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useRobots } from "../services/RobotsContext";
 import axiosInstance from "../services/axiosInstance";
+import Navbar from "../components/Navbar";
 
 const levelColors = {
   INFO: "bg-blue-100 text-blue-700 ring-1 ring-blue-300",
@@ -20,8 +21,15 @@ function Logs() {
 
   useEffect(() => {
     getAllRobots();
-    if (id) getRobot(id);
+    if (id) {
+      getRobot(id);
+      setRobotFilter(id);
+    } else {
+      setRobotFilter("All");
+    }
   }, [id]);
+
+
 
   useEffect(() => {
     if (robot?.status === false) {
@@ -37,6 +45,7 @@ function Logs() {
     eventSource.addEventListener("log", (event) => {
       try {
         const newLog = JSON.parse(event.data);
+        console.log("Received Log:", newLog);
         setLogs((prev) => [...prev, newLog]);
       } catch (err) {
         console.error("Error parsing log:", err);
@@ -73,13 +82,18 @@ function Logs() {
   };
 
   const filteredLogs = logs.filter((log) => {
-    const matchRobot = robotFilter === "All" || String(log.robot?.id) === String(robotFilter);
+    const logRobotId = log.robotId || (log.robot && log.robot.id);
+    const matchRobot = robotFilter === "All" || String(logRobotId) === String(robotFilter);
     const matchLevel = levelFilter === "All" || log.type === levelFilter;
     return matchRobot && matchLevel;
   });
 
   return (
+  <>
+  
+  <Navbar/>
     <div className="p-6 min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+       
       <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-3xl font-bold text-gray-800">📡 Live Robot Logs</h1>
         <div className="flex gap-2 flex-wrap">
@@ -161,7 +175,9 @@ function Logs() {
                   <td className="px-4 py-2">
                     {new Date(log.timestamp).toLocaleString()}
                   </td>
-                  <td className="px-4 py-2">{log.robot?.id || "N/A"}</td>
+                  <td className="px-4 py-2">
+                    {log.robotId || (log.robot && log.robot.id) || "N/A"}
+                  </td>
                   <td className="px-4 py-2">
                     <span
                       className={`text-xs font-bold px-2 py-1 rounded-full ${levelColors[log.type] || "bg-gray-200 text-gray-600"}`}
@@ -192,6 +208,7 @@ function Logs() {
         </div>
       )}
     </div>
+     </>
   );
 }
 

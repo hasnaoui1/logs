@@ -60,72 +60,121 @@ function Account() {
     alert(`Logs deleted for robot ${robotId}`);
   };
 
-  return (
-    <div className="max-w-3xl mx-auto p-6 mt-8 bg-white shadow rounded-xl">
-      <h1 className="text-2xl font-bold mb-4 text-gray-800">Account Settings</h1>
+  return(
+    <div className="min-h-screen bg-[#f5f7fa] p-6">
+  <div className="relative max-w-4xl mx-auto mt-8">
+    {/* Header */}
+    <div className="flex items-center space-x-3 mb-8">
+      <div className="w-12 h-12 bg-[#1f2937] rounded-xl flex items-center justify-center shadow-md">
+        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      </div>
+      <div>
+        <h1 className="text-3xl font-semibold text-[#1f2937]">Account Settings</h1>
+        <p className="text-gray-500 text-sm">Manage your profile and robots</p>
+      </div>
+    </div>
 
-      <form onSubmit={handleUpdate} className="space-y-4">
+    {/* Profile Section */}
+    <div className="bg-white rounded-xl border border-gray-200 shadow-md p-8 mb-6">
+      <div className="flex items-center gap-3 mb-6">
+        <svg className="w-6 h-6 text-[#2563eb]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h2 className="text-xl font-semibold text-[#1f2937]">Profile Information</h2>
+      </div>
+
+      <form onSubmit={handleUpdate} className="space-y-5">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Username</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
           <input
             type="text"
             value={formData.username}
             onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-            className="mt-1 w-full px-4 py-2 border rounded-md"
+            className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-[#2563eb]"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Email</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
           <input
             type="email"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="mt-1 w-full px-4 py-2 border rounded-md"
+            className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-800 focus:ring-2 focus:ring-[#2563eb]"
           />
         </div>
 
         <button
           type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
+          className="px-6 py-3 bg-[#2563eb] hover:bg-[#1e40af] text-white font-medium rounded-lg shadow transition"
         >
           Update Profile
         </button>
       </form>
+    </div>
 
-      <div className="mt-10">
-        <h2 className="text-xl font-semibold mb-2 text-gray-800">Your Robots</h2>
+    {/* Robots Section */}
+    <div className="bg-white rounded-xl border border-gray-200 shadow-md p-8">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <svg className="w-6 h-6 text-[#2563eb]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+          </svg>
+          <h2 className="text-xl font-semibold text-[#1f2937]">Your Robots</h2>
+        </div>
+
         <button
           onClick={handleDeleteAllRobots}
-          className="mb-4 bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700"
+          className="px-4 py-2 bg-red-100 hover:bg-red-200 text-[#dc2626] font-medium rounded-lg border border-red-300 transition"
         >
           Delete All Robots
         </button>
-
-        {robots?.length === 0 ? (
-          <p className="text-gray-500">No robots found.</p>
-        ) : (
-          <ul className="space-y-2">
-            {robots.map((robot) => (
-              <li
-                key={robot.id}
-                className="flex justify-between items-center bg-gray-50 p-3 rounded border"
-              >
-                <span>
-                  <strong>ID:</strong> {robot.id} — <strong>Name:</strong> {robot.name}
-                </span>
-                <button
-                  onClick={() => handleDeleteLogsForRobot(robot.id)}
-                  className="bg-yellow-600 text-white px-2 py-1 rounded hover:bg-yellow-700 text-sm"
-                >
-                  Delete Logs
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
+
+      {robots?.length === 0 ? (
+        <div className="text-center py-10">
+          <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+          </svg>
+          <p className="text-gray-600 font-medium">No robots found</p>
+          <p className="text-gray-400 text-sm">Add robots to get started</p>
+        </div>
+      ) : (
+        <ul className="space-y-3">
+          {robots.map((robot) => (
+            <li
+              key={robot.id}
+              className="flex justify-between items-center bg-gray-50 border border-gray-200 p-4 rounded-lg"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-[#2563eb] rounded-lg flex items-center justify-center shadow">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-[#1f2937] font-medium">{robot.name}</p>
+                  <p className="text-gray-500 text-sm">ID: {robot.id}</p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => handleDeleteLogsForRobot(robot.id)}
+                className="px-4 py-2 bg-yellow-100 hover:bg-yellow-200 text-[#b45309] font-medium rounded-lg border border-yellow-300 transition"
+              >
+                Delete Logs
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
+  </div>
+</div>
+
   );
 }
+
 export default Account;

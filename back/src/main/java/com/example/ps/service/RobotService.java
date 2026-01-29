@@ -39,17 +39,8 @@ public class RobotService {
         if (robotOptional.isPresent()) {
             Robot robot = robotOptional.get();
             robot.setStatus(status);
-            robotRepository.save(robot);
+            return robotRepository.save(robot);
         }
-        return robotOptional.get();
+        throw new IllegalArgumentException("Robot not found with id: " + id);
     }
-    public void incrementSessions(Long id) {
-        Optional<Robot> robotOptional = robotRepository.findById(id);
-        if (robotOptional.isPresent()) {
-            Robot robot = robotOptional.get();
-            robot.setSessions(robot.getSessions() + 1);
-             robotRepository.save(robot);
-        }
-    }
-
 }

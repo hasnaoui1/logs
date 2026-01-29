@@ -34,7 +34,6 @@ public class MqttMessageHandler implements MessageHandler {
         String payload = message.getPayload().toString();
         System.out.println("📩 MQTT RECEIVED: " + payload);
 
-
         String[] parts = payload.split("\\|", 3);
 
         Long robotId = Long.parseLong(parts[0]);
@@ -55,18 +54,24 @@ public class MqttMessageHandler implements MessageHandler {
                 robotId,
                 logMessage,
                 logType,
-                LocalDateTime.now()
-        );
+                LocalDateTime.now());
 
         // SSE dispatch
+        com.example.ps.dto.LogResponse response = new com.example.ps.dto.LogResponse(
+                log.getId(),
+                log.getMessage(),
+                log.getType(),
+                log.getTimestamp(),
+                log.getRobot() != null ? log.getRobot().getId() : null,
+                log.getSession() != null ? log.getSession().getId() : null);
+
         for (SseEmitter emitter : emitters) {
             try {
-                emitter.send(SseEmitter.event().name("log").data(log));
+                emitter.send(SseEmitter.event().name("log").data(response));
             } catch (Exception e) {
                 emitters.remove(emitter);
             }
         }
     }
-
 
 }

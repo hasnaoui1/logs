@@ -1,8 +1,10 @@
 package com.example.ps.controller;
 
 import com.example.ps.entities.Robot;
+import com.example.ps.entities.Session;
 import com.example.ps.service.NotificationService;
 import com.example.ps.service.RobotService;
+import com.example.ps.service.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,13 +17,15 @@ import java.util.Optional;
 class RobotController {
 
     private final RobotService robotService;
-
     private final NotificationService notificationService;
+    private final SessionService sessionService;
 
     @Autowired
-    public RobotController(RobotService robotService , NotificationService notificationService) {
+    public RobotController(RobotService robotService, NotificationService notificationService,
+            SessionService sessionService) {
         this.robotService = robotService;
         this.notificationService = notificationService;
+        this.sessionService = sessionService;
     }
 
     @GetMapping("/all")
@@ -45,7 +49,7 @@ class RobotController {
                 .map(robot -> {
                     robot.setName(updatedRobot.getName());
                     robot.setStatus(updatedRobot.getStatus());
-                    robot.setSessions(updatedRobot.getSessions());
+                    robot.setSessionCount(updatedRobot.getSessionCount());
                     return robotService.saveRobot(robot);
                 })
                 .orElseGet(() -> {
@@ -54,26 +58,41 @@ class RobotController {
                 });
     }
 
-
     @DeleteMapping("/{id}")
     public void deleteRobot(@PathVariable Long id) {
         robotService.deleteRobot(id);
     }
 
     @PutMapping("/changeStatus/{id}/status")
-    public ResponseEntity<Robot> toggleStatus(@PathVariable Long id, @RequestParam boolean status) {
+    public ResponseEntity<?> toggleStatus(@PathVariable Long id, @RequestParam boolean status) {
         Robot updatedRobot = robotService.changeStatus(id, status);
+        Session session = null;
 
+        if (status) {
+            // Robot is being turned ON - start a new session
+            session = sessionService.startSession(id);
+        } else {
+            // Robot is being turned OFF - end the active session
+            try {
+                session = sessionService.endSession(id);
+            } catch (IllegalArgumentException e) {
+                // No active session found, that's okay
+            }
+            notificationService.createNotification("Robot " + updatedRobot.getName() + " has been turned off");
+        }
 
-        if(!status){
-            notificationService.createNotification("robot" + updatedRobot.getName()+ "has been turned off");
-        }
-        if(status){
-            robotService.incrementSessions(id);
-        }
-        return ResponseEntity.ok(updatedRobot);
+        // Return both the robot and session info
+        return ResponseEntity.ok(new RobotStatusResponse(updatedRobot, session));
     }
 
+    // Response class for toggle status
+    public static class RobotStatusResponse {
+        public Robot robot;
+        public Session session;
 
-
+        public RobotStatusResponse(Robot robot, Session session) {
+            this.robot = robot;
+            this.session = session;
+        }
+    }
 }

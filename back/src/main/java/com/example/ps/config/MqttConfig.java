@@ -30,10 +30,12 @@ public class MqttConfig {
     @Bean
     public DefaultMqttPahoClientFactory mqttClientFactory() {
         MqttConnectOptions options = new MqttConnectOptions();
-        options.setServerURIs(new String[]{brokerUrl});
-        return new DefaultMqttPahoClientFactory() {{
-            setConnectionOptions(options);
-        }};
+        options.setServerURIs(new String[] { brokerUrl });
+        return new DefaultMqttPahoClientFactory() {
+            {
+                setConnectionOptions(options);
+            }
+        };
     }
 
     @Bean
@@ -45,9 +47,8 @@ public class MqttConfig {
     public MessageProducer inbound() {
         System.out.println("🚀 SUBSCRIBING TO TOPIC: " + topic);
 
-        MqttPahoMessageDrivenChannelAdapter adapter =
-                new MqttPahoMessageDrivenChannelAdapter(clientId + "_in",
-                        mqttClientFactory(), topic);
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(clientId + "_in",
+                mqttClientFactory(), topic);
 
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
@@ -64,8 +65,7 @@ public class MqttConfig {
     @Bean
     @ServiceActivator(inputChannel = "mqttOutboundChannel")
     public MessageHandler mqttOutbound() {
-        MqttPahoMessageHandler handler =
-                new MqttPahoMessageHandler(clientId + "_out", mqttClientFactory());
+        MqttPahoMessageHandler handler = new MqttPahoMessageHandler(clientId + "_out", mqttClientFactory());
         handler.setAsync(true);
         handler.setDefaultTopic(topic);
         return handler;
@@ -73,17 +73,8 @@ public class MqttConfig {
 
     @Bean
     @ServiceActivator(inputChannel = "mqttInputChannel")
-    public MessageHandler inboundMessageHandler() {
-        return message -> {
-            System.out.println("📩 MQTT MESSAGE RECEIVED: " + message.getPayload());
-        };
-    }
-    @Bean
-    @ServiceActivator(inputChannel = "mqttInputChannel")
     public MessageHandler mqttInboundHandler(MqttMessageHandler handler) {
         return handler;
     }
-
-
 
 }

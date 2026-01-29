@@ -2,14 +2,18 @@ import time
 import paho.mqtt.client as mqtt
 import random
 import json
+import os
 from datetime import datetime
 
-broker = "localhost"
-topic = "logs/simulation"
+broker_url = os.getenv("MQTT_BROKER_URL", "tcp://host.docker.internal:1883")
+# Parse tcp://host:port
+broker = broker_url.split("//")[-1].split(":")[0]
+port = int(broker_url.split(":")[-1]) if ":" in broker_url.split("//")[-1] else 1883
+topic = os.getenv("MQTT_TOPIC", "logs/simulation")
 robot_id = 1
 
 client = mqtt.Client(client_id="robot-log-simulator")
-client.connect(broker, 1883, 60)
+client.connect(broker, port, 60)
 
 # ------- REALISTIC LOG TEMPLATES -------- #
 
